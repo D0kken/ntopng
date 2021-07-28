@@ -709,5 +709,5 @@ void LocalHostStats::updateDomainNamesBehaviour() {
 #endif
 
   contacted_domain_names.addObservation((u_int32_t)hll_delta_value_domain_names);
-    
+  
 }
