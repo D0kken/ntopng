@@ -710,5 +710,4 @@ void LocalHostStats::updateDomainNamesBehaviour() {
 
   contacted_domain_names.addObservation((u_int32_t)hll_delta_value_domain_names);
     
-    ndpi_hll_reset(&hll_contacted_domain_names);
 }
