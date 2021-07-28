@@ -500,7 +500,7 @@ typedef enum {
   host_alert_remote_connection           = 12,
   host_alert_host_log                    = 13,
   host_alert_dangerous_host              = 14,
-  host_alert_domain_names_connection     = 15,
+  host_alert_domain_names_connection     = 16,
 
   MAX_DEFINED_HOST_ALERT_TYPE, /* Leave it as last member */ 
   MAX_HOST_ALERT_TYPE = 16 /* Constrained by Bitmap16 engaged_alerts_map inside HostAlertableEntity */
@@ -531,6 +531,7 @@ typedef enum {
   host_check_remote_connection,
   host_check_dangerous_host,
   host_check_domain_names_connection,
+
 
   NUM_DEFINED_HOST_CHECKS, /* Leave it as last member */ 
 } HostCheckID;
