@@ -34,6 +34,7 @@ void DomainNamesContacts::periodicUpdate(Host *h, HostAlert *engaged_alert) {
   HostAlert *alert = engaged_alert;
   u_int32_t num_domain_names = 0;
 
+
   if((num_domain_names = h->getDomainNamesCardinality()) > domain_names_threshold ) {
     if (!alert) alert = allocAlert(this, h, CLIENT_FAIR_RISK_PERCENTAGE, num_domain_names,domain_names_threshold);
     if (alert) h->triggerAlert(alert);
