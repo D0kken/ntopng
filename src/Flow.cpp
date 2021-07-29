@@ -107,7 +107,7 @@ Flow::Flow(NetworkInterface *_iface,
     cli_ip_addr = cli_host->get_ip();
     cli_host->incCliContactedHosts(_srv_ip);
     cli_host->incCliContactedPorts(_srv_port);
-    if(cli_host->isLocalHost() && domain_name!=NULL)  cli_host->addContactedDomainName(domain_name);
+    if(domain_name!=NULL)  cli_host->addContactedDomainName(domain_name);
   } else { /* Client host has not been allocated, let's keep the info in an IpAddress */
     if((cli_ip_addr = new (std::nothrow) IpAddress(*_cli_ip)))
       cli_ip_addr->reloadBlacklist(iface->get_ndpi_struct());
@@ -120,7 +120,6 @@ Flow::Flow(NetworkInterface *_iface,
     srv_ip_addr = srv_host->get_ip();
     srv_host->incSrvHostContacts(_cli_ip);
     srv_host->incSrvPortsContacts(_cli_port);
-    if(srv_host->isLocalHost() && domain_name!=NULL) srv_host->addContactedDomainName(domain_name);
   } else { /* Server host has not been allocated, let's keep the info in an IpAddress */
     if((srv_ip_addr = new (std::nothrow) IpAddress(*_srv_ip)))
       srv_ip_addr->reloadBlacklist(iface->get_ndpi_struct());

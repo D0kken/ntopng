@@ -53,17 +53,12 @@ LocalHostStats::LocalHostStats(Host *_host) : HostStats(_host) {
    if(ndpi_hll_init(&hll_contacted_hosts, 8) != 0)
     throw "Failed HLL initialization"; 
 
-   /* hll init, 4 bits -> 16 bytes per LocalHost */ 
-   if(ndpi_hll_init(&hll_contacted_domain_names, 4) != 0) 
-    throw "Failed HLL initialization"; 
-
-
   hll_delta_value = 0, old_hll_value = 0, new_hll_value = 0;
-  hll_delta_value_domain_names = 0, old_hll_value_domain_names= 0, new_hll_value_domain_names= 0;
 
   num_dns_servers.init(5);
   num_smtp_servers.init(5);
   num_ntp_servers.init(5);
+  num_contacted_domain_names.init(4);          
 }
 
 /* *************************************** */
@@ -86,16 +81,12 @@ LocalHostStats::LocalHostStats(LocalHostStats &s) : HostStats(s) {
    if(ndpi_hll_init(&hll_contacted_hosts, 8) != 0)
     throw "Failed HLL initialization"; 
 
-   /* hll init, 4 bits -> 16 bytes per LocalHost */ 
-   if(ndpi_hll_init(&hll_contacted_domain_names, 4) != 0) 
-    throw "Failed HLL initialization"; 
-
   hll_delta_value = 0, old_hll_value = 0, new_hll_value = 0;
-  hll_delta_value_domain_names = 0, old_hll_value_domain_names= 0, new_hll_value_domain_names= 0;
   
   num_dns_servers.init(5);
   num_smtp_servers.init(5);
   num_ntp_servers.init(5);
+  num_contacted_domain_names.init(4);         
 }
 
 /* *************************************** */
@@ -113,7 +104,6 @@ LocalHostStats::~LocalHostStats() {
 #endif
 
   ndpi_hll_destroy(&hll_contacted_hosts);
-  ndpi_hll_destroy(&hll_contacted_domain_names);
 
 }
 
@@ -172,8 +162,6 @@ void LocalHostStats::updateStats(const struct timeval *tv) {
   if(tv->tv_sec >= nextPeriodicUpdate) {
     /* hll visited sites update */
     updateContactedHostsBehaviour();
-    /* hll contacted asn and country*/
-    updateDomainNamesBehaviour();
 
     /* Contacted peers update */
     updateHostContacts();
@@ -249,25 +237,6 @@ void LocalHostStats::luaHostBehaviour(lua_State* vm) {
 
 /* *************************************** */
 
-
-
-void LocalHostStats::luaDomainNamesBehaviour(lua_State* vm) {
-HostStats::luaHostBehaviour(vm);
-  
-  lua_newtable(vm);
-    
-  lua_push_float_table_entry(vm, "value", hll_delta_value_domain_names);
-  lua_push_bool_table_entry(vm, "anomaly",      contacted_domain_names.anomalyFound());
-  lua_push_uint64_table_entry(vm, "lower_bound", contacted_domain_names.getLastLowerBound());
-  lua_push_uint64_table_entry(vm, "upper_bound", contacted_domain_names.getLastUpperBound());
-
-  lua_pushstring(vm, "contacted_domain_names_behaviour");
-  lua_insert(vm, -2);
-  lua_settable(vm, -3);
-}
-
-/* *************************************** */
-
 void LocalHostStats::lua(lua_State* vm, bool mask_host, DetailsLevel details_level) {
   HostStats::lua(vm, mask_host, details_level);
 
@@ -282,7 +251,6 @@ void LocalHostStats::lua(lua_State* vm, bool mask_host, DetailsLevel details_lev
   }
 
   luaHostBehaviour(vm);
-  luaDomainNamesBehaviour(vm);
 
   if(details_level >= details_high) {
     luaICMP(vm,host->get_ip()->isIPv4(),true);
@@ -301,7 +269,7 @@ void LocalHostStats::lua(lua_State* vm, bool mask_host, DetailsLevel details_lev
     lua_push_int32_table_entry(vm, "num_contacted_ports_as_client",
 			       num_contacted_ports_as_client.getEstimate());
     lua_push_int32_table_entry(vm, "num_host_contacted_ports_as_server",
-			       num_host_contacted_ports_as_server.getEstimate());
+			       num_host_contacted_ports_as_server.getEstimate());     
       
     lua_pushstring(vm, "cardinality");
     lua_insert(vm, -2);
@@ -414,7 +382,6 @@ void LocalHostStats::lua_get_timeseries(lua_State* vm) {
   }
 
   luaHostBehaviour(vm);
-  luaDomainNamesBehaviour(vm);
 
 }
 
@@ -689,25 +656,4 @@ void LocalHostStats::updateContactedHostsBehaviour() {
 #endif
   
   contacted_hosts.addObservation((u_int64_t)hll_delta_value);
-}
-
-/* *************************************** */
-
-void LocalHostStats::updateDomainNamesBehaviour() {
-
-  old_hll_value_domain_names = new_hll_value_domain_names;
-  new_hll_value_domain_names = ndpi_hll_count(&hll_contacted_domain_names);
-  hll_delta_value_domain_names = new_hll_value_domain_names - old_hll_value_domain_names;
-
-#ifdef TRACE_ME
-  char buf[64];
-  
-  ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s / %f contacts",
-			       host->get_ip()->print(buf, sizeof(buf)),
-			       last_hll_contacted_domain_names_value);
-  ndpi_hll_reset(&hll_contacted_domain_names);
-#endif
-
-  contacted_domain_names.addObservation((u_int32_t)hll_delta_value_domain_names);
-    
 }

@@ -97,7 +97,7 @@ class LocalHost : public Host, public SerializableElement {
   virtual void incrVisitedWebSite(char *hostname)  { stats->incrVisitedWebSite(hostname); };
   virtual void addContactedDomainName(char* domain_name)    { stats->addContactedDomainName(domain_name);   }         
   virtual u_int32_t getDomainNamesCardinality()             { return stats->getDomainNamesCardinality();    }      
-  virtual void resetDomainNamesCardinality()                { stats->resetDomainNamesCardinality();         }           
+  virtual void resetDomainNamesCardinality()                { stats->resetDomainNamesCardinality();         }   
   virtual HTTPstats* getHTTPstats()                { return(stats->getHTTPstats());       };
   virtual DnsStats*  getDNSstats()                 { return(stats->getDNSstats());        };
   virtual ICMPstats* getICMPstats()                { return(stats->getICMPstats());       };
@@ -115,13 +115,12 @@ class LocalHost : public Host, public SerializableElement {
   void custom_periodic_stats_update(const struct timeval *tv) { ; }
 
   virtual void luaHostBehaviour(lua_State* vm)       { if(stats) stats->luaHostBehaviour(vm); }
-  virtual void luaDomainNamesBehaviour(lua_State* vm){ if(stats) stats->luaDomainNamesBehaviour(vm); }
   virtual void incDohDoTUses(Host *srv_host);
 
   virtual void incNTPContactCardinality(Host *h)  { stats->incNTPContactCardinality(h);  }
   virtual void incDNSContactCardinality(Host *h)  { stats->incDNSContactCardinality(h);  }
   virtual void incSMTPContactCardinality(Host *h) { stats->incSMTPContactCardinality(h); }
-
+  
   virtual u_int32_t getNTPContactCardinality()    { return(stats->getNTPContactCardinality());  }
   virtual u_int32_t getDNSContactCardinality()    { return(stats->getDNSContactCardinality());  }
   virtual u_int32_t getSMTPContactCardinality()   { return(stats->getSMTPContactCardinality()); }

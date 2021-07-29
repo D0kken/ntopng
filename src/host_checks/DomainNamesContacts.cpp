@@ -24,13 +24,13 @@
 
 /* ***************************************************** */
 
-DomainNamesConnection::DomainNamesConnection() : HostCheck(ntopng_edition_community, false /* All interfaces */, false /* Don't exclude for nEdge */, false /* NOT only for nEdge */) {
-  domain_names_threshold=(u_int8_t)-1;
+DomainNamesContacts::DomainNamesContacts() : ServerContacts() {
+  domain_names_threshold=(u_int16_t)-1;
 };
 
 /* ***************************************************** */
 
-void DomainNamesConnection::periodicUpdate(Host *h, HostAlert *engaged_alert) {
+void DomainNamesContacts::periodicUpdate(Host *h, HostAlert *engaged_alert) {
   HostAlert *alert = engaged_alert;
   u_int32_t num_domain_names = 0;
 
@@ -43,13 +43,13 @@ void DomainNamesConnection::periodicUpdate(Host *h, HostAlert *engaged_alert) {
 
 }
 
-bool DomainNamesConnection::loadConfiguration(json_object *config) {
+bool DomainNamesContacts::loadConfiguration(json_object *config) {
   json_object *json_threshold;
 
   HostCheck::loadConfiguration(config); /* Parse parameters in common */
 
   if(json_object_object_get_ex(config, "threshold", &json_threshold))
-    domain_names_threshold = (u_int8_t)json_object_get_int64(json_threshold);
+    domain_names_threshold = (u_int16_t)json_object_get_int64(json_threshold);
 
   // ntop->getTrace()->traceEvent(TRACE_NORMAL, "%s %u", json_object_to_json_string(config), ntp_bytes_threshold);
 

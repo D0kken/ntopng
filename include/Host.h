@@ -461,7 +461,6 @@ class Host : public GenericHashEntry, public HostAlertableEntity, public Score, 
   void incContactedService(char *name)       { stats->incContactedService(name);  }
 
   virtual void luaHostBehaviour(lua_State* vm)        { lua_pushnil(vm); }
-  virtual void luaDomainNamesBehaviour(lua_State* vm) { lua_pushnil(vm); }
   
   virtual void incDohDoTUses(Host *srv_host) {}
 

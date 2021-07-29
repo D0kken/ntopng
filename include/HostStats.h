@@ -131,7 +131,6 @@ class HostStats: public GenericTrafficElement {
   virtual void lua(lua_State* vm, bool mask_host, DetailsLevel details_level);
   void updateStats(const struct timeval *tv);
   virtual void luaHostBehaviour(lua_State* vm);
-  virtual void luaDomainNamesBehaviour(lua_State* vm){}
   
 #ifdef NTOPNG_PRO
   inline void incQuotaEnforcementStats(time_t when, u_int16_t ndpi_proto,

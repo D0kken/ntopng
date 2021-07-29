@@ -39,15 +39,17 @@ class LocalHostStats: public HostStats {
   /* Estimate of the number of critical servers used by this host */
   Cardinality num_dns_servers, num_smtp_servers, num_ntp_servers;
 
-  /* Estimate the number of contacted hosts,asn and country using HyperLogLog*/
-  struct ndpi_hll hll_contacted_hosts, hll_contacted_domain_names;
+  /* Estimate of the number of different Domain Names contacted */
+  Cardinality num_contacted_domain_names;
+
+  /* Estimate the number of contacted hosts using HyperLogLog*/
+  struct ndpi_hll hll_contacted_hosts;
   double     old_hll_value,              new_hll_value,              hll_delta_value;
-  u_int32_t  old_hll_value_domain_names, new_hll_value_domain_names, hll_delta_value_domain_names;
-  DESCounter contacted_hosts, contacted_domain_names;
+  DESCounter contacted_hosts;
   
   /* Written by NetworkInterface::periodicStatsUpdate thread */
   char *old_sites;
-  u_int8_t current_cycle;
+  u_int8_t current_cycle; 
 
   Cardinality num_contacted_hosts_as_client, /* # of hosts contacted by this host   */
     num_host_contacts_as_server,             /* # of hosts that contacted this host */
@@ -93,14 +95,13 @@ class LocalHostStats: public HostStats {
   virtual void luaHTTP(lua_State *vm)  { if(http) http->lua(vm); }
   virtual void luaICMP(lua_State *vm, bool isV4, bool verbose)    { if (icmp) icmp->lua(isV4, vm, verbose); }
   virtual void luaPeers(lua_State *vm);
-  virtual void incrVisitedWebSite(char *hostname);
-  virtual void addContactedDomainName(char* domain_name)    { ndpi_hll_add(&hll_contacted_domain_names,domain_name,strlen(domain_name));}       
-  virtual u_int32_t getDomainNamesCardinality()             { return (u_int32_t)ndpi_hll_count(&hll_contacted_domain_names);            }  
-  virtual void resetDomainNamesCardinality()                { ndpi_hll_reset(&hll_contacted_domain_names);                              }         
+  virtual void incrVisitedWebSite(char *hostname);    
+  virtual void addContactedDomainName(char* domain_name)    { num_contacted_domain_names.addElement(domain_name,strlen(domain_name));  }
+  virtual u_int32_t getDomainNamesCardinality()             { return num_contacted_domain_names.getEstimate(); }  
+  virtual void resetDomainNamesCardinality()                { num_contacted_domain_names.reset();              }       
   virtual void lua_get_timeseries(lua_State* vm);
   void luaContactsBehaviour(lua_State *vm);
   virtual void luaHostBehaviour(lua_State* vm);
-  virtual void luaDomainNamesBehaviour(lua_State* vm);
   virtual bool hasAnomalies(time_t when);
   virtual void luaAnomalies(lua_State* vm, time_t when);
   virtual HTTPstats* getHTTPstats() { return(http); };
@@ -123,7 +124,7 @@ class LocalHostStats: public HostStats {
   virtual u_int32_t getSMTPContactCardinality() { return(num_smtp_servers.getEstimate()); };
   virtual void incNTPContactCardinality(Host *h)  { if(h->get_ip()) num_ntp_servers.addElement(h->get_ip()->key());  };
   virtual void incDNSContactCardinality(Host *h)  { if(h->get_ip()) num_dns_servers.addElement(h->get_ip()->key());  };
-  virtual void incSMTPContactCardinality(Host *h) { if(h->get_ip()) num_smtp_servers.addElement(h->get_ip()->key()); };
+ virtual void incSMTPContactCardinality(Host *h) { if(h->get_ip()) num_smtp_servers.addElement(h->get_ip()->key()); };
 
   virtual void incCliContactedHosts(IpAddress *peer) {
     peer->incCardinality(&num_contacted_hosts_as_client);
